@@ -21,6 +21,7 @@ script:
     chmod +x "${HOME}/bin/shfmt";
     shfmt -version;
   fi
+- make lint
 - git diff --exit-code
 - git diff --cached --exit-code
 - ./void -h
