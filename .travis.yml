@@ -1,3 +1,27 @@
 language: bash
+sudo: false
+dist: trusty
+cache:
+  directories:
+  - "${HOME}/bin"
+env:
+  global:
+  - UNAME="$(uname | tr '[:upper:]' '[:lower:]')"
+  - PATH="${HOME}/bin:${PATH}"
+  - SHELLCHECK_URL="https://s3.amazonaws.com/travis-blue-public/binaries/ubuntu/14.04/x86_64/shellcheck-0.4.6.tar.bz2"
+  - SHFMT_URL="https://github.com/mvdan/sh/releases/download/v1.3.1/shfmt_v1.3.1_linux_amd64"
 install: skip
-script: skip
+script:
+- if [ $UNAME = linux ] && ! shellcheck --version; then
+    curl -sSL "${SHELLCHECK_URL}" | tar -C "${HOME}/bin" -xjf -;
+    shellcheck --version;
+  fi
+- if [ $UNAME = linux ] && [[ $(shfmt -version 2>/dev/null) != v1.3.1 ]] ; then
+    curl -sSL "${SHFMT_URL}" -o "${HOME}/bin/shfmt";
+    chmod +x "${HOME}/bin/shfmt";
+    shfmt -version;
+  fi
+- git diff --exit-code
+- git diff --cached --exit-code
+- ./void -h
+- ./void -V
