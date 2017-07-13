@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+#
+#+  Usage: $(basename $0) [flags] [compiler-name] [prefix]
+#+  -
+#+  Version: ${VOID_VERSION}
+#+  Copyright: ${VOID_COPYRIGHT}
+#+  License URL: ${VOID_LICENSE_URL}
+#+  -
+#+  Install, use, and otherwise manage C compilers.
+#+  -
+#+  Option flags:
+#+          -h --help help - show this help text and exit
+#+    -V --version version - show the version only and exit
+#+  -
+#+  Influential env vars:
+#+  -
+#+      VOID_COMPILER_NAME - compiler to install (*REQUIRED*, may be given as first positional arg)
+#+             VOID_PREFIX - prefix for installed compilers (default '${VOID_PREFIX}', may be given
+#+                           as second positional arg)
+#+  -
+#
+set -e
+shopt -s nullglob
+shopt -s dotglob
+shopt -s extglob
+set -o pipefail
+
+[[ ${VOID_DEBUG} ]] && set -x
+
+VOID_VERSION="v0.1.0"
+VOID_COPYRIGHT="Copyright (c) 2017 Travis CI GmbH"
+VOID_LICENSE_URL="https://raw.githubusercontent.com/travis-ci/void/master/LICENSE"
+export VOID_VERSION
+export VOID_COPYRIGHT
+export VOID_LICENSE_URL
+
+: "${VOID_ENV_PREFIX:=${HOME}/.void/envs}"
+: "${VOID_PREFIX:=${HOME}/.void/compilers}"
+: "${VOID_TMP:=${TMPDIR:-/tmp}/void}"
+
+while [[ $# -gt 0 ]]; do
+  case "${1}" in
+    -h | --help | help | wat)
+      _old_ifs="$IFS"
+      IFS=';'
+      awk '/^#\+  / {
+        sub(/^#\+  /, "", $0) ;
+        sub(/-$/, "", $0) ;
+        print $0
+      }' "$0" | while read -r line; do
+        eval "echo \"$line\""
+      done
+      IFS="$_old_ifs"
+      exit 0
+      ;;
+    -V | --version | version)
+      echo "${VOID_VERSION}"
+      exit 0
+      ;;
+    *)
+      break
+      ;;
+  esac
+  shift
+done
+
+if [[ -n "${1}" ]]; then
+  VOID_COMPILER_NAME="${1}"
+fi
+if [[ -n "${2}" ]]; then
+  VOID_PREFIX="${2}"
+fi
+
+echo "Nothing to do ... yet"
+echo "but here is what came in:"
+echo "  VOID_COMPILER_NAME=${VOID_COMPILER_NAME}"
+echo "  VOID_PREFIX=${VOID_PREFIX}"
